@@ -10,6 +10,9 @@
       "style": {
         "noParameterProperties": "off"
       },
+      "performance": {
+        "noBarrelFile": "off"
+      },
       "suspicious": {
         "noExplicitAny": "off",
         "noConsoleLog": "off"
