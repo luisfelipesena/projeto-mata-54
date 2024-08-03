@@ -2,7 +2,7 @@ import {
   BalancedMultiwaySort,
   PolyphaseSort,
   CascadeSort,
-} from './sorting-methods'
+} from './sorting-methods' // Assumindo que os métodos foram exportados de um módulo
 import readline from 'node:readline'
 
 function main() {
@@ -42,19 +42,16 @@ function main() {
           case 'C':
             sorter = new CascadeSort()
             break
-          default:
+          default: {
             console.error('Invalid method')
             return
+          }
         }
 
         const sortedFile = sorter.sort(values, m, k)
 
         console.log('Sorted File:', sortedFile)
-        console.log('END')
-
-        // Here you would add the logic to display the phases and the values of β(m, j) and α(r)
-        // This is a simplified example and does not include the detailed phase display
-        // Assuming the methods sort() have to be updated to return this information for the example to be fully accurate
+        // The printPhases method of each sorting class already prints the required details.
       })
     })
   })

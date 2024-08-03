@@ -8,7 +8,8 @@
     "rules": {
       "all": true,
       "style": {
-        "noParameterProperties": "off"
+        "noParameterProperties": "off",
+        "noNonNullAssertion": "off"
       },
       "performance": {
         "noBarrelFile": "off"
