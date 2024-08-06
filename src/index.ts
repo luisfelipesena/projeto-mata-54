@@ -2,7 +2,7 @@ import {
   BalancedMultiwaySort,
   PolyphaseSort,
   CascadeSort,
-} from './sorting-methods' // Assumindo que os métodos foram exportados de um módulo
+} from './sorting-methods'
 import readline from 'node:readline'
 
 function main() {
@@ -48,10 +48,7 @@ function main() {
           }
         }
 
-        const sortedFile = sorter.sort(values, m, k)
-
-        console.log('Sorted File:', sortedFile)
-        // The printPhases method of each sorting class already prints the required details.
+        sorter.sort(values, m, k)
       })
     })
   })
