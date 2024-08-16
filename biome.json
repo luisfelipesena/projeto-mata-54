@@ -21,6 +21,9 @@
       "correctness": {
         "noNodejsModules": "off",
         "noUnusedVariables": "off"
+      },
+      "complexity": {
+        "noForEach": "off"
       }
     }
   },
