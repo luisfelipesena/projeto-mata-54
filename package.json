@@ -3,7 +3,7 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "clear && bun run src/index.ts",
+    "start": "clear && bun run src/index.ts",
     "check": "biome check --write"
   },
   "devDependencies": {
