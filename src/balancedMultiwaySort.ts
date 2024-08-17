@@ -1,5 +1,5 @@
 import type { InputData, SortResult, PhaseResult } from './types'
-import { calculateBeta, calculateAlpha, mergeSequences, generateInitialSequences } from './utils'
+import { calculateBeta, calculateAlpha, mergeMultipleSequences, generateInitialSequences } from './utils'
 
 export function balancedMultiWaySort(data: InputData): SortResult {
   const { mMaximumMemoryInRegisters, nListToBeSorted, kMaximumFilesOpened, rInitialRuns } = data
@@ -17,10 +17,9 @@ export function balancedMultiWaySort(data: InputData): SortResult {
   let currentSequences = initialSequences
   for (let phase = 1; currentSequences.length > 1; phase++) {
     const newSequences: number[][] = []
-    for (let i = 0; i < currentSequences.length; i += 2) {
-      const seq1 = currentSequences[i]
-      const seq2 = currentSequences[i + 1] || []
-      newSequences.push(mergeSequences(seq1, seq2))
+    for (let i = 0; i < currentSequences.length; i += kMaximumFilesOpened) {
+      const sequencesToMerge = currentSequences.slice(i, i + kMaximumFilesOpened)
+      newSequences.push(mergeMultipleSequences(sequencesToMerge))
     }
     currentSequences = newSequences
     phases.push({ phase, beta: calculateBeta(mMaximumMemoryInRegisters, currentSequences), sequences: currentSequences })

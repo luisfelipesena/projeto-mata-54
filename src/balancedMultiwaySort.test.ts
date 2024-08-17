@@ -13,7 +13,6 @@ describe('balancedMultiwaySort', () => {
     }
 
     const result = balancedMultiWaySort(input)
-    console.log(result)
 
     const numberOfPhases = result.phases.length;
     const lastPhase = result.phases[numberOfPhases - 1];
@@ -36,6 +35,7 @@ describe('balancedMultiwaySort', () => {
     }
 
     const result = balancedMultiWaySort(input)
+    console.log(result)
 
     expect(result.phases.length).toBe(1) // Apenas a fase inicial
     expect(result.phases[0].sequences[0]).toEqual([1, 2, 3])
