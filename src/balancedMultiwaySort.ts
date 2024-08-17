@@ -1,15 +1,15 @@
 import type { InputData, SortResult, PhaseResult } from './types'
 import { calculateBeta, calculateAlpha, mergeSequences, generateInitialSequences } from './utils'
 
-export function balancedMultiwaySort(data: InputData): SortResult {
-  const { m, n } = data
+export function balancedMultiWaySort(data: InputData): SortResult {
+  const { mMaximumMemoryInRegisters, nListToBeSorted, kMaximumFilesOpened, rInitialRuns } = data
   const phases: PhaseResult[] = []
   let totalWrites = 0
 
   // Fase 0 - Geração das sequências iniciais
-  const initialSequences = generateInitialSequences(n, m)
+  const initialSequences = generateInitialSequences(nListToBeSorted, mMaximumMemoryInRegisters)
 
-  const beta0 = calculateBeta(m, initialSequences)
+  const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
   phases.push({ phase: 0, beta: beta0, sequences: initialSequences })
   totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
 
@@ -23,13 +23,12 @@ export function balancedMultiwaySort(data: InputData): SortResult {
       newSequences.push(mergeSequences(seq1, seq2))
     }
     currentSequences = newSequences
-    const beta = calculateBeta(m, currentSequences)
-    phases.push({ phase, beta, sequences: currentSequences })
+    phases.push({ phase, beta: calculateBeta(mMaximumMemoryInRegisters, currentSequences), sequences: currentSequences })
     totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
   }
 
   // Cálculo final de alpha
-  const alpha = calculateAlpha(totalWrites, n.length)
+  const alpha = calculateAlpha(totalWrites, nListToBeSorted.length)
 
   return { phases, alpha }
 }

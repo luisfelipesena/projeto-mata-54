@@ -1,7 +1,7 @@
 import type { InputData, SortResult, PhaseResult } from './types'
 
 export function balancedMultiwaySort(data: InputData): SortResult {
-  const { m, n } = data
+  const { mMaximumMemoryInRegisters: m, nListToBeSorted: n } = data
   const phases: PhaseResult[] = []
   let totalWrites = 0
 
@@ -34,7 +34,7 @@ export function balancedMultiwaySort(data: InputData): SortResult {
 }
 
 export function polyphaseSort(data: InputData): SortResult {
-  const { m, n } = data
+  const { mMaximumMemoryInRegisters: m, nListToBeSorted: n } = data
   const phases: PhaseResult[] = []
   let totalWrites = 0
 
@@ -75,7 +75,7 @@ export function polyphaseSort(data: InputData): SortResult {
 }
 
 export function cascadeSort(data: InputData): SortResult {
-  const { m, n } = data
+  const { mMaximumMemoryInRegisters: m, nListToBeSorted: n } = data
   const phases: PhaseResult[] = []
   let totalWrites = 0
 

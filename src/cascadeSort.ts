@@ -7,7 +7,7 @@ import {
 } from './utils'
 
 export function cascadeSort(data: InputData): SortResult {
-  const { m, n } = data
+  const { mMaximumMemoryInRegisters: m, nListToBeSorted: n } = data
   const phases: PhaseResult[] = []
   let totalWrites = 0
 

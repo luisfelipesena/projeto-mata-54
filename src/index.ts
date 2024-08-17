@@ -1,5 +1,5 @@
 import type { InputData, SortResult, SortMethod } from './types'
-import { balancedMultiwaySort } from './balancedMultiwaySort'
+import { balancedMultiWaySort } from './balancedMultiwaySort'
 import { polyphaseSort } from './polyphaseSort'
 import { cascadeSort } from './cascadeSort'
 
@@ -9,11 +9,11 @@ function processInput(input: string[]): void {
   const [m, k, r] = input[1].split(' ').map(Number)
   const n = input[2].split(' ').map(Number)
 
-  const data: InputData = { method, m, k, r, n }
+  const data: InputData = { method, mMaximumMemoryInRegisters: m, kMaximumFilesOpened: k, rInitialRuns: r, nListToBeSorted: n }
 
   let result: SortResult
   if (method === 'B') {
-    result = balancedMultiwaySort(data)
+    result = balancedMultiWaySort(data)
   } else if (method === 'P') {
     result = polyphaseSort(data)
   } else if (method === 'C') {

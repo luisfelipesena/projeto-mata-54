@@ -7,7 +7,7 @@ import {
 } from './utils'
 
 export function polyphaseSort(data: InputData): SortResult {
-  const { m, n } = data
+  const { mMaximumMemoryInRegisters: m, kMaximumFilesOppened: k, rInitialRuns: r, nListToBeSorted: n } = data
   const phases: PhaseResult[] = []
   let totalWrites = 0
 
