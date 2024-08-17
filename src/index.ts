@@ -1,57 +1,38 @@
-import {
-  BalancedMultiwaySort,
-  PolyphaseSort,
-  CascadeSort,
-} from './sorting-methods'
-import readline from 'node:readline'
+import type { InputData, SortResult, SortMethod } from './types'
+import { balancedMultiwaySort } from './balancedMultiwaySort'
+import { polyphaseSort } from './polyphaseSort'
+import { cascadeSort } from './cascadeSort'
 
-function main() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
+// Função principal para processar a entrada e executar o método de ordenação
+function processInput(input: string[]): void {
+  const method = input[0] as SortMethod
+  const [m, k, r] = input[1].split(' ').map(Number)
+  const n = input[2].split(' ').map(Number)
 
-  let method: string
-  let m: number
-  let k: number
-  let r: number
-  let n: number
-  let values: number[] = []
+  const data: InputData = { method, m, k, r, n }
 
-  rl.question('Enter the sorting method (B, P, or C): ', (answer1: string) => {
-    method = answer1.trim()
-    rl.question('Enter the values of m, k, r, and n: ', (answer2: string) => {
-      const params = answer2.trim().split(' ').map(Number)
-      m = params[0]
-      k = params[1]
-      r = params[2]
-      n = params[3]
+  let result: SortResult
+  if (method === 'B') {
+    result = balancedMultiwaySort(data)
+  } else if (method === 'P') {
+    result = polyphaseSort(data)
+  } else if (method === 'C') {
+    result = cascadeSort(data)
+  } else {
+    console.log(`Método ${method} não reconhecido.`)
+    return
+  }
 
-      rl.question('Enter the values to be sorted: ', (answer3: string) => {
-        values = answer3.trim().split(' ').map(Number)
-        rl.close()
-
-        let sorter: any
-        switch (method) {
-          case 'B':
-            sorter = new BalancedMultiwaySort()
-            break
-          case 'P':
-            sorter = new PolyphaseSort()
-            break
-          case 'C':
-            sorter = new CascadeSort()
-            break
-          default: {
-            console.error('Invalid method')
-            return
-          }
-        }
-
-        sorter.sort(values, m, k)
-      })
+  // Exibe o resultado
+  result.phases.forEach((phase) => {
+    console.log(`fase ${phase.phase} ${phase.beta.toFixed(2)}`)
+    phase.sequences.forEach((seq, index) => {
+      console.log(`${index + 1}: {${seq.join(' ')}}`)
     })
   })
+  console.log(`final ${result.alpha.toFixed(2)}`)
 }
 
-main()
+// Teste com exemplo de entrada
+const inputExample = ['B', '3 4 3', '7 1 5 6 3 8 2 10 4 9 1 3 7 4 1 2 3']
+processInput(inputExample)
