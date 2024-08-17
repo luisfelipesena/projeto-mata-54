@@ -15,14 +15,16 @@ export function balancedMultiWaySort(data: InputData): SortResult {
 
   // Fases de intercalamento
   let currentSequences = initialSequences
-  for (let phase = 1; currentSequences.length > 1; phase++) {
+  while (currentSequences.length > 1) {
     const newSequences: number[][] = []
     for (let i = 0; i < currentSequences.length; i += kMaximumFilesOpened) {
-      const sequencesToMerge = currentSequences.slice(i, i + kMaximumFilesOpened)
+      const sequencesToMerge = currentSequences.slice(i, Math.min(i + kMaximumFilesOpened, currentSequences.length))
       newSequences.push(mergeMultipleSequences(sequencesToMerge))
     }
     currentSequences = newSequences
-    phases.push({ phase, beta: calculateBeta(mMaximumMemoryInRegisters, currentSequences), sequences: currentSequences })
+    const beta = calculateBeta(mMaximumMemoryInRegisters, currentSequences)
+    phases.push({ phase: phases.length, beta, sequences: currentSequences })
+    // Atualiza o total de escritas para esta fase
     totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
   }
 

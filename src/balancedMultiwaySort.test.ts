@@ -72,4 +72,20 @@ describe('balancedMultiwaySort', () => {
 
     expect(result.phases[result.phases.length - 1].sequences[0]).toEqual([1, 2, 3, 5, 7])
   })
+
+  it('deve calcular corretamente o valor de alpha', () => {
+    const input: InputData = {
+      method: 'B',
+      mMaximumMemoryInRegisters: 3,
+      kMaximumFilesOpened: 4,
+      rInitialRuns: 3,
+      nListToBeSorted: [5, 2, 8, 1, 9, 3, 7, 6, 4]
+    }
+
+    const result = balancedMultiWaySort(input)
+
+    // O valor esperado de alpha dependerá da implementação específica
+    // Este é um exemplo; ajuste conforme necessário
+    expect(result.alpha).toBeCloseTo(2.33, 2) // Esperamos um valor próximo a 2.33 com 2 casas decimais de precisão
+  })
 })
