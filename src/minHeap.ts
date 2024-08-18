@@ -64,6 +64,12 @@ export class MinHeap {
   public allFlagged(): boolean {
     return this.heap.every((element) => element.flagged)
   }
+  public clearAllFlags(): void {
+    this.heap.forEach((element) => {
+      element.flagged = false
+    })
+    this.bubbleDown()
+  }
 
   private bubbleUp(): void {
     let index = this.size() - 1

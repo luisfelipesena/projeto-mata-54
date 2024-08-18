@@ -20,10 +20,16 @@ export function balancedMultiWaySort(data: InputData): SortResult {
   const initialSequences = generateInitialSequences(
     nListToBeSorted,
     mMaximumMemoryInRegisters,
+    rInitialRuns,
   )
 
+
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
-  phases.push({ phase: 0, beta: beta0, sequences: initialSequences })
+  const files = distributeInitialSequences(initialSequences, kMaximumFilesOpened)
+  const inputFiles = files.slice(0, files.length / 2)
+  const outputFiles = files.slice(inputFiles.length)
+
+  phases.push({ phase: 0, beta: beta0, sequences: initialSequences, filesOpened: [...inputFiles, ...outputFiles] })
   totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
 
   // Fases de intercalamento
@@ -48,4 +54,14 @@ export function balancedMultiWaySort(data: InputData): SortResult {
   const alpha = calculateAlpha(totalWrites, nListToBeSorted.length)
 
   return { phases, alpha }
+}
+
+function distributeInitialSequences(sequences: number[][], kMaximumFilesOpened: number) {
+  const filesOpened = Array.from({ length: kMaximumFilesOpened }, () => [] as number[][])
+  const firstHalf = Math.floor(kMaximumFilesOpened / 2)
+
+  for (let i = 0; i < sequences.length; i++) {
+    filesOpened[i % firstHalf].push(sequences[i])
+  }
+  return filesOpened
 }

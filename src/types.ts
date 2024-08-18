@@ -13,10 +13,12 @@ export interface InputData {
   nListToBeSorted: number[]
 }
 
+type Sequences = number[][]
 export interface PhaseResult {
   phase: number
   beta: number
-  sequences: number[][]
+  sequences: Sequences
+  filesOpened: Sequences[]
 }
 
 export interface SortResult {

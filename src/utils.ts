@@ -1,6 +1,8 @@
+import { MinHeap } from '~/minHeap'
+
 export function calculateBeta(m: number, sequences: number[][]): number {
   const totalLength = sequences.reduce((acc, seq) => acc + seq.length, 0)
-  return totalLength / (m * sequences.length)
+  return Number.parseFloat((totalLength / (m * sequences.length)).toFixed(2))
 }
 
 // Função auxiliar para calcular alpha
@@ -25,22 +27,52 @@ export function mergeSequences(seq1: number[], seq2: number[]): number[] {
 }
 
 // Função para geração de sequências iniciais usando seleção natural
-export function generateInitialSequences(n: number[], m: number): number[][] {
+export function generateInitialSequences(
+  n: number[],
+  mMaximumMemoryInRegisters: number,
+  rInitialRuns: number,
+): number[][] {
   const sequences: number[][] = []
-  let heap: number[] = []
+  const minHeap = new MinHeap()
+  let currentSequence: number[] = []
+  let lastAddedValue = Number.NEGATIVE_INFINITY
 
   for (let i = 0; i < n.length; i++) {
-    heap.push(n[i])
-    if (heap.length === m || i === n.length - 1) {
-      heap.sort((a, b) => a - b) // Ordena o heap
-      sequences.push([...heap]) // Adiciona uma cópia do heap como uma sequência
-      heap = []
+    const currentValue = n[i]
+    if (sequences.length === rInitialRuns) {
+      break
     }
+
+    if (minHeap.size() < mMaximumMemoryInRegisters) {
+      if (currentValue < lastAddedValue) {
+        minHeap.insertFlagged(currentValue)
+      } else {
+        minHeap.insert(currentValue)
+      }
+    }
+
+    if (minHeap.size() === mMaximumMemoryInRegisters || i === n.length - 1) {
+      const minValue = minHeap.extractMin()
+      if (minValue !== undefined) {
+        currentSequence.push(minValue)
+        lastAddedValue = minValue
+      }
+    }
+
+    if (minHeap.allFlagged()) {
+      sequences.push(currentSequence)
+      currentSequence = []
+      lastAddedValue = Number.NEGATIVE_INFINITY
+      minHeap.clearAllFlags()
+    }
+  }
+
+  if (currentSequence.length > 0) {
+    sequences.push(currentSequence)
   }
 
   return sequences
 }
-
 
 // Função para mesclar múltiplas sequências
 export function mergeMultipleSequences(sequences: number[][]): number[] {
