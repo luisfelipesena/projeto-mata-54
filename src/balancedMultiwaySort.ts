@@ -1,8 +1,13 @@
-import type { InputData, SortResult, PhaseResult } from './types'
+import type {
+  InputData,
+  SortResult,
+  PhaseResult,
+  Sequences,
+  SequenceFile,
+} from './types'
 import {
   calculateBeta,
   calculateAlpha,
-  mergeMultipleSequences,
   generateInitialSequences,
 } from './utils'
 
@@ -23,26 +28,28 @@ export function balancedMultiWaySort(data: InputData): SortResult {
     rInitialRuns,
   )
 
-
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
-  const files = distributeInitialSequences(initialSequences, kMaximumFilesOpened)
-  const inputFiles = files.slice(0, files.length / 2)
-  const outputFiles = files.slice(inputFiles.length)
+  const files = distributeInitialSequences(
+    initialSequences,
+    kMaximumFilesOpened,
+  )
+  const busyFiles = files.splice(0, files.length / 2)
+  const freeFiles = files.splice(0)
 
-  phases.push({ phase: 0, beta: beta0, sequences: initialSequences, filesOpened: [...inputFiles, ...outputFiles] })
+  phases.push({
+    phase: 0,
+    beta: beta0,
+    sequences: initialSequences,
+    filesOpened: [...busyFiles, ...freeFiles] as SequenceFile,
+  })
   totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
 
   // Fases de intercalamento
   let currentSequences = initialSequences
   while (currentSequences.length > 1) {
-    const newSequences: number[][] = []
-    for (let i = 0; i < currentSequences.length; i += kMaximumFilesOpened) {
-      const sequencesToMerge = currentSequences.slice(
-        i,
-        Math.min(i + kMaximumFilesOpened, currentSequences.length),
-      )
-      newSequences.push(mergeMultipleSequences(sequencesToMerge))
-    }
+    const newSequences = [] as unknown as Sequences
+    // TODO: Implementar a lógica de intercalamento
+
     currentSequences = newSequences
     const beta = calculateBeta(mMaximumMemoryInRegisters, currentSequences)
     phases.push({ phase: phases.length, beta, sequences: currentSequences })
@@ -56,12 +63,18 @@ export function balancedMultiWaySort(data: InputData): SortResult {
   return { phases, alpha }
 }
 
-function distributeInitialSequences(sequences: number[][], kMaximumFilesOpened: number) {
-  const filesOpened = Array.from({ length: kMaximumFilesOpened }, () => [] as number[][])
+function distributeInitialSequences(
+  sequences: Sequences,
+  kMaximumFilesOpened: number,
+): SequenceFile {
+  const filesOpened = Array.from(
+    { length: kMaximumFilesOpened },
+    () => [] as number[][],
+  )
   const firstHalf = Math.floor(kMaximumFilesOpened / 2)
 
   for (let i = 0; i < sequences.length; i++) {
     filesOpened[i % firstHalf].push(sequences[i])
   }
-  return filesOpened
+  return filesOpened as SequenceFile
 }

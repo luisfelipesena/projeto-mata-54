@@ -1,4 +1,5 @@
 import { MinHeap } from '~/minHeap'
+import type { Sequences } from '~/types'
 
 export function calculateBeta(m: number, sequences: number[][]): number {
   const totalLength = sequences.reduce((acc, seq) => acc + seq.length, 0)
@@ -31,7 +32,7 @@ export function generateInitialSequences(
   n: number[],
   mMaximumMemoryInRegisters: number,
   rInitialRuns: number,
-): number[][] {
+): Sequences {
   const sequences: number[][] = []
   const minHeap = new MinHeap()
   let currentSequence: number[] = []
@@ -71,7 +72,7 @@ export function generateInitialSequences(
     sequences.push(currentSequence)
   }
 
-  return sequences
+  return sequences as Sequences
 }
 
 // Função para mesclar múltiplas sequências
