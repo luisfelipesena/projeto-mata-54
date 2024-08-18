@@ -2,8 +2,8 @@ import { describe, it, expect } from 'bun:test'
 import { balancedMultiWaySort } from './balancedMultiwaySort'
 import type { InputData, Sequence } from './types'
 
-describe.skip('balancedMultiwaySort', () => {
-  it.only('deve ordenar corretamente uma entrada simples', () => {
+describe('balancedMultiwaySort', () => {
+  it('deve ordenar corretamente uma entrada simples', () => {
     const input: InputData = {
       method: 'B',
       mMaximumMemoryInRegisters: 3,
@@ -21,7 +21,7 @@ describe.skip('balancedMultiwaySort', () => {
     const alphaValue = result.alpha
 
     expect(numberOfPhases).toBeGreaterThan(0)
-    expect(sortedSequence).toEqual(expectedSortedSequence)
+    expect(sortedSequence).toEqual(expectedSortedSequence as Sequence)
     expect(alphaValue).toBeGreaterThan(0)
   })
 
@@ -36,9 +36,8 @@ describe.skip('balancedMultiwaySort', () => {
 
     const result = balancedMultiWaySort(input)
 
-    // expect(result.phases.length).toBe(1) // Apenas a fase inicial
-    expect(result.phases[0].sequences[0]).toEqual([1, 2, 3])
-    expect(result.phases[0].sequences[1]).toEqual([4, 5])
+    expect(result.phases.length).toBe(1) // Apenas a fase inicial
+    expect(result.phases[0].sequences[0]).toEqual([1, 2, 3, 4, 5] as Sequence)
   })
 
   it('deve calcular corretamente beta para cada fase', () => {
@@ -51,9 +50,8 @@ describe.skip('balancedMultiwaySort', () => {
     }
 
     const result = balancedMultiWaySort(input)
-
-    expect(result.phases[0].beta).toBe(1) // (2 + 2 + 2) / (2 * 3)
-    expect(result.phases[1].beta).toBe(3) // (6) / (2 * 2)
+    expect(result.phases[0].beta).toBe(1.5)
+    expect(result.phases[1].beta).toBe(3)
   })
 
   it('deve lidar com entradas de tamanho ímpar', () => {
@@ -69,7 +67,7 @@ describe.skip('balancedMultiwaySort', () => {
 
     expect(result.phases[result.phases.length - 1].sequences[0]).toEqual([
       1, 2, 3, 5, 7,
-    ])
+    ] as Sequence)
   })
 
   it('deve calcular corretamente o valor de alpha', () => {

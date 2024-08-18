@@ -1,15 +1,18 @@
 import { describe, it, expect } from 'bun:test'
 import { MinHeap } from './minHeap'
 
-describe.skip('MinHeap', () => {
+describe('MinHeap', () => {
   it('deve inserir elementos corretamente e manter o tamanho máximo de 3', () => {
+    const log = false
     const heap = new MinHeap()
     const maxSize = 3
     const values = [18, 7, 3, 24, 15, 5, 20, 25, 16, 14]
     const sequence: number[] = []
     let maxValue: number | undefined = undefined
 
-    console.log('Inserindo elementos na heap:')
+    if (log) {
+      console.log('Inserindo elementos na heap:')
+    }
 
     values.forEach((value, index) => {
       if (maxValue !== undefined && value < maxValue) {
@@ -23,9 +26,10 @@ describe.skip('MinHeap', () => {
         sequence.push(maxValue!)
       }
 
-      console.log(`Após inserir ${value} (maxValue: ${maxValue}):`)
-      logHeapState(heap, sequence)
-
+      if (log) {
+        console.log(`Após inserir ${value} (maxValue: ${maxValue}):`)
+        logHeapState(heap, sequence)
+      }
     })
 
     expect(heap.size()).toBe(3)

@@ -41,13 +41,19 @@ function processInput(input: string[]): void {
   // Exibe o resultado
   result.phases.forEach((phase) => {
     console.log(`fase ${phase.phase} ${phase.beta.toFixed(2)}`)
-    phase.sequences.forEach((seq, index) => {
-      console.log(`${index + 1}: {${seq.join(' ')}}`)
+    phase.filesOpened.forEach((files, index) => {
+      const sequences = files.reduce((acc, file) => {
+        return `${acc} {${file.join(' ')}}`
+      }, '')
+      if (sequences) {
+
+        console.log(`${index + 1}: ${sequences}`)
+      }
     })
   })
   console.log(`final ${result.alpha.toFixed(2)}`)
 }
 
 // Teste com exemplo de entrada
-const inputExample = ['B', '3 4 3', '7 1 5 6 3 8 2 10 4 9 1 3 7 4 1 2 3']
+const inputExample = ['B', '3 4 3', '7 1 5 6 3 8 10 2 4 9 1 3 7 4 1 2 3']
 processInput(inputExample)

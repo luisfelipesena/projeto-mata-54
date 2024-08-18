@@ -65,6 +65,9 @@ export class MinHeap {
     return this.heap.every((element) => element.flagged)
   }
   public clearAllFlags(): void {
+    if (this.isEmpty()) {
+      return
+    }
     this.heap.forEach((element) => {
       element.flagged = false
     })

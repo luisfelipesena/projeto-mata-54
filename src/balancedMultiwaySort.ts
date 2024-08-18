@@ -85,7 +85,6 @@ export function balancedMultiWaySort(data: InputData): SortResult {
     phase++
   }
 
-  // Cálculo final de alpha
   const alpha = calculateAlpha(totalWrites, nListToBeSorted.length)
 
   return { phases, alpha }

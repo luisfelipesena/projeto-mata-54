@@ -33,26 +33,28 @@ export function generateInitialSequences(
   mMaximumMemoryInRegisters: number,
   rInitialRuns: number,
 ): Sequences {
+  const nListToBeSorted = [...n]
   const sequences: number[][] = []
   const minHeap = new MinHeap()
   let currentSequence: number[] = []
   let lastAddedValue = Number.NEGATIVE_INFINITY
 
-  for (let i = 0; i < n.length; i++) {
-    const currentValue = n[i]
-    if (sequences.length === rInitialRuns) {
+  // for (let i = 0; i < n.length; i++) {
+  while (nListToBeSorted.length > 0 || minHeap.size() > 0) {
+    const currentValue = nListToBeSorted.shift()
+    if (sequences.length === rInitialRuns && nListToBeSorted.length === 0) {
       break
     }
 
     if (minHeap.size() < mMaximumMemoryInRegisters) {
-      if (currentValue < lastAddedValue) {
+      if (currentValue !== undefined && currentValue < lastAddedValue) {
         minHeap.insertFlagged(currentValue)
-      } else {
+      } else if (currentValue !== undefined) {
         minHeap.insert(currentValue)
       }
     }
 
-    if (minHeap.size() === mMaximumMemoryInRegisters || i === n.length - 1) {
+    if (minHeap.size() === mMaximumMemoryInRegisters || nListToBeSorted.length === 0) {
       const minValue = minHeap.extractMin()
       if (minValue !== undefined) {
         currentSequence.push(minValue)
