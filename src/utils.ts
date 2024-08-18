@@ -41,33 +41,6 @@ export function generateInitialSequences(n: number[], m: number): number[][] {
   return sequences
 }
 
-// Função para geração de sequências iniciais usando seleção natural
-export function generateInitialSequencesWithPaths(n: number[], m: number, p: number): number[][] {
-  const sequences: number[][] = []
-  let heap: number[] = []
-  let currentPath = 0
-
-  for (let i = 0; i < n.length; i++) {
-    heap.push(n[i])
-    if (heap.length === m || i === n.length - 1) {
-      heap.sort((a, b) => a - b) // Ordena o heap
-
-      // Divide o heap em p caminhos
-      const sequenceSize = Math.ceil(heap.length / p)
-      for (let j = 0; j < p && heap.length > 0; j++) {
-        const pathSequence = heap.splice(0, sequenceSize)
-        if (pathSequence.length > 0) {
-          sequences.push(pathSequence)
-          currentPath = (currentPath + 1) % p
-        }
-      }
-
-      heap = []
-    }
-  }
-
-  return sequences
-}
 
 // Função para mesclar múltiplas sequências
 export function mergeMultipleSequences(sequences: number[][]): number[] {
