@@ -9,6 +9,8 @@ import {
   calculateBeta,
   calculateAlpha,
   generateInitialSequences,
+  mergeMultipleSequences,
+  deepCopy,
 } from './utils'
 
 export function balancedMultiWaySort(data: InputData): SortResult {
@@ -33,28 +35,57 @@ export function balancedMultiWaySort(data: InputData): SortResult {
     initialSequences,
     kMaximumFilesOpened,
   )
-  const busyFiles = files.splice(0, files.length / 2)
-  const freeFiles = files.splice(0)
+  let busyFiles = files.slice(0, Math.floor(kMaximumFilesOpened / 2))
+  let freeFiles = files.slice(Math.floor(kMaximumFilesOpened / 2))
 
   phases.push({
     phase: 0,
     beta: beta0,
     sequences: initialSequences,
-    filesOpened: [...busyFiles, ...freeFiles] as SequenceFile,
+    filesOpened: [...deepCopy(busyFiles), ...deepCopy(freeFiles)] as SequenceFile,
   })
   totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
 
   // Fases de intercalamento
-  let currentSequences = initialSequences
-  while (currentSequences.length > 1) {
+  let phase = 1
+  while (busyFiles.some((file) => file.length > 0)) {
     const newSequences = [] as unknown as Sequences
-    // TODO: Implementar a lógica de intercalamento
+    const newBusyFiles = [] as unknown as SequenceFile
+    const newFreeFiles = [] as unknown as SequenceFile
 
-    currentSequences = newSequences
-    const beta = calculateBeta(mMaximumMemoryInRegisters, currentSequences)
-    phases.push({ phase: phases.length, beta, sequences: currentSequences })
+    // Intercalar sequências dos busyFiles
+    for (const _ of busyFiles) {
+      const sequencesToMerge = busyFiles.map((file) => file[0] || [])
+      const mergedSequence = mergeMultipleSequences(sequencesToMerge)
+      newSequences.push(mergedSequence as unknown as number[])
+      newFreeFiles.push([mergedSequence] as any)
+
+      // Remover as sequências usadas dos busyFiles
+      busyFiles.forEach((file) => file.shift())
+    }
+
+    // Atualizar busyFiles e freeFiles
+    newBusyFiles.push(...busyFiles.filter((file) => file.length > 0))
+    newFreeFiles.push(...freeFiles.filter((file) => file.length > 0))
+
+    const beta = calculateBeta(
+      mMaximumMemoryInRegisters,
+      newSequences as Sequences,
+    )
+    phases.push({
+      phase,
+      beta,
+      sequences: newSequences as Sequences,
+      filesOpened: [...newBusyFiles, ...newFreeFiles] as SequenceFile,
+    })
+
     // Atualiza o total de escritas para esta fase
-    totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
+    totalWrites += newSequences.reduce((acc, seq) => acc + seq.length, 0)
+
+    // Preparar para a próxima fase
+    busyFiles = newBusyFiles
+    freeFiles = newFreeFiles
+    phase++
   }
 
   // Cálculo final de alpha

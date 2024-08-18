@@ -104,3 +104,5 @@ export function mergeMultipleSequences(sequences: number[][]): number[] {
 
   return merged
 }
+
+export const deepCopy = <T>(array: T[]): T[] => JSON.parse(JSON.stringify(array))
