@@ -31,60 +31,62 @@ export function balancedMultiWaySort(data: InputData): SortResult {
   )
 
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
-  const files = distributeInitialSequences(
+  let files = distributeInitialSequences(
     initialSequences,
     kMaximumFilesOpened,
   )
-  let busyFiles = files.slice(0, Math.floor(kMaximumFilesOpened / 2))
-  let freeFiles = files.slice(Math.floor(kMaximumFilesOpened / 2))
 
   phases.push({
     phase: 0,
     beta: beta0,
     sequences: initialSequences,
-    filesOpened: [...deepCopy(busyFiles), ...deepCopy(freeFiles)] as SequenceFile,
+    filesOpened: deepCopy(files) as SequenceFile,
   })
   totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
 
   // Fases de intercalamento
   let phase = 1
-  while (busyFiles.some((file) => file.length > 0)) {
-    const newSequences = [] as unknown as Sequences
-    const newBusyFiles = [] as unknown as SequenceFile
-    const newFreeFiles = [] as unknown as SequenceFile
+  while (files.flat().length > 1) {
+    const newFiles = [] as unknown as SequenceFile
+    const halfK = Math.floor(kMaximumFilesOpened / 2)
 
-    // Intercalar sequências dos busyFiles
-    for (const _ of busyFiles) {
-      const sequencesToMerge = busyFiles.map((file) => file[0] || [])
-      const mergedSequence = mergeMultipleSequences(sequencesToMerge)
-      newSequences.push(mergedSequence as unknown as number[])
-      newFreeFiles.push([mergedSequence] as any)
+    // Intercalar sequências dos arquivos ocupados
+    for (let i = 0; i < halfK; i++) {
+      const sequencesToMerge = files.slice(0, halfK).map(file => file[0] || [])
+      if (sequencesToMerge.some(seq => seq.length > 0)) {
+        const mergedSequence = mergeMultipleSequences(sequencesToMerge)
+        newFiles.push([mergedSequence] as any)
 
-      // Remover as sequências usadas dos busyFiles
-      busyFiles.forEach((file) => file.shift())
+        // Remover as sequências usadas
+        for (let j = 0; j < halfK; j++) {
+          if (files[j] && files[j].length > 0) {
+            files[j].shift()
+          }
+        }
+      }
     }
 
-    // Atualizar busyFiles e freeFiles
-    newBusyFiles.push(...busyFiles.filter((file) => file.length > 0))
-    newFreeFiles.push(...freeFiles.filter((file) => file.length > 0))
+    // Adicionar sequências não mescladas aos novos arquivos
+    files.forEach(file => {
+      if (file.length > 0) {
+        newFiles.push(file)
+      }
+    })
 
-    const beta = calculateBeta(
-      mMaximumMemoryInRegisters,
-      newSequences as Sequences,
-    )
+    files = newFiles
+
+    const currentSequences = files.flat() as Sequences
+    const beta = calculateBeta(mMaximumMemoryInRegisters, currentSequences)
     phases.push({
       phase,
       beta,
-      sequences: newSequences as Sequences,
-      filesOpened: [...newBusyFiles, ...newFreeFiles] as SequenceFile,
+      sequences: currentSequences,
+      filesOpened: deepCopy(files) as SequenceFile,
     })
 
     // Atualiza o total de escritas para esta fase
-    totalWrites += newSequences.reduce((acc, seq) => acc + seq.length, 0)
+    totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
 
-    // Preparar para a próxima fase
-    busyFiles = newBusyFiles
-    freeFiles = newFreeFiles
     phase++
   }
 
