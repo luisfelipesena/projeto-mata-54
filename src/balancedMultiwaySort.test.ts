@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'bun:test'
 import { balancedMultiWaySort } from './balancedMultiwaySort'
-import type { InputData } from './types'
+import type { InputData, Sequence } from './types'
 
 describe.skip('balancedMultiwaySort', () => {
-  it('deve ordenar corretamente uma entrada simples', () => {
+  it.only('deve ordenar corretamente uma entrada simples', () => {
     const input: InputData = {
       method: 'B',
       mMaximumMemoryInRegisters: 3,
@@ -51,7 +51,6 @@ describe.skip('balancedMultiwaySort', () => {
     }
 
     const result = balancedMultiWaySort(input)
-    console.log(result)
 
     expect(result.phases[0].beta).toBe(1) // (2 + 2 + 2) / (2 * 3)
     expect(result.phases[1].beta).toBe(3) // (6) / (2 * 2)
@@ -90,7 +89,7 @@ describe.skip('balancedMultiwaySort', () => {
   })
 })
 
-it('Exemplo de teste', () => {
+it('Exemplo do pdf', () => {
   const input: InputData = {
     method: 'B',
     mMaximumMemoryInRegisters: 3,
@@ -100,8 +99,6 @@ it('Exemplo de teste', () => {
   }
 
   const result = balancedMultiWaySort(input)
-  console.log(result)
-
-  // const expectedSortedSequence = [1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 6, 7, 7, 8, 9, 10];
-  // expect(result.phases[result.phases.length - 1].sequences[0]).toEqual(expectedSortedSequence);
+  const expectedSortedSequence = [1, 1, 2, 3, 3, 4, 4, 5, 6, 7, 7, 8, 9, 10] as Sequence;
+  expect(result.phases.at(-1)?.sequences[0]).toEqual(expectedSortedSequence);
 })

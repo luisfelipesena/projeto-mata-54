@@ -31,10 +31,7 @@ export function balancedMultiWaySort(data: InputData): SortResult {
   )
 
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
-  let files = distributeInitialSequences(
-    initialSequences,
-    kMaximumFilesOpened,
-  )
+  let files = distributeInitialSequences(initialSequences, kMaximumFilesOpened)
 
   phases.push({
     phase: 0,
@@ -46,34 +43,32 @@ export function balancedMultiWaySort(data: InputData): SortResult {
 
   // Fases de intercalamento
   let phase = 1
-  while (files.flat().length > 1) {
-    const newFiles = [] as unknown as SequenceFile
-    const halfK = Math.floor(kMaximumFilesOpened / 2)
+  while (files.filter((file) => file.length > 0).length > 1) {
+    const newFiles = Array.from({ length: kMaximumFilesOpened }, () => [] as unknown as Sequences)
+    const freeFilesIndexes = (() => {
+      const indexes = files.map((_, index) => _.length === 0 ? index : null).filter(v => v !== null)
+      return indexes
+    })()
+    const busyFilesIndexes = (() => {
+      const indexes = files.map((_, index) => _.length > 0 ? index : null).filter(v => v !== null)
+      return indexes
+    })()
 
     // Intercalar sequências dos arquivos ocupados
-    for (let i = 0; i < halfK; i++) {
-      const sequencesToMerge = files.slice(0, halfK).map(file => file[0] || [])
-      if (sequencesToMerge.some(seq => seq.length > 0)) {
-        const mergedSequence = mergeMultipleSequences(sequencesToMerge)
-        newFiles.push([mergedSequence] as any)
+    for (const index of freeFilesIndexes) {
+      const sequencesToMerge = files.map((file) => file[0] || [])
+      if (sequencesToMerge.some((seq) => seq.length > 0)) {
 
+        const mergedSequence = mergeMultipleSequences(sequencesToMerge)
+        newFiles[index] = [mergedSequence] as Sequences
         // Remover as sequências usadas
-        for (let j = 0; j < halfK; j++) {
-          if (files[j] && files[j].length > 0) {
-            files[j].shift()
-          }
+        for (const busyIndex of busyFilesIndexes) {
+          files[busyIndex].shift()
         }
       }
     }
 
-    // Adicionar sequências não mescladas aos novos arquivos
-    files.forEach(file => {
-      if (file.length > 0) {
-        newFiles.push(file)
-      }
-    })
-
-    files = newFiles
+    files = newFiles as SequenceFile
 
     const currentSequences = files.flat() as Sequences
     const beta = calculateBeta(mMaximumMemoryInRegisters, currentSequences)

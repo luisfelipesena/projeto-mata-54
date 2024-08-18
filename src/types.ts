@@ -13,7 +13,8 @@ export interface InputData {
   nListToBeSorted: number[]
 }
 
-export type Sequences = number[][] & { __brand: 'Sequences' }
+export type Sequence = number[] & { __brand: 'Sequence' }
+export type Sequences = Sequence[] & { __brand: 'Sequences' }
 export type SequenceFile = Sequences[] & { __brand: 'SequenceFile' }
 export interface PhaseResult {
   phase: number

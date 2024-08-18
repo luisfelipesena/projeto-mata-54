@@ -1,5 +1,5 @@
 import { MinHeap } from '~/minHeap'
-import type { Sequences } from '~/types'
+import type { Sequence, Sequences } from '~/types'
 
 export function calculateBeta(m: number, sequences: number[][]): number {
   const totalLength = sequences.reduce((acc, seq) => acc + seq.length, 0)
@@ -76,7 +76,7 @@ export function generateInitialSequences(
 }
 
 // Função para mesclar múltiplas sequências
-export function mergeMultipleSequences(sequences: number[][]): number[] {
+export function mergeMultipleSequences(sequences: Sequence[]): Sequence {
   const merged: number[] = []
   const heads: number[] = new Array(sequences.length).fill(0)
 
@@ -102,7 +102,7 @@ export function mergeMultipleSequences(sequences: number[][]): number[] {
     heads[minIndex]++
   }
 
-  return merged
+  return merged as Sequence
 }
 
 export const deepCopy = <T>(array: T[]): T[] => JSON.parse(JSON.stringify(array))
