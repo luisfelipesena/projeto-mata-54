@@ -1,6 +1,6 @@
 import { it, expect } from 'bun:test'
 import type { InputData, Sequence, Sequences } from './types'
-import { polyphaseSort, distributeInitialSequences, generateFibonacciSequenceGeneralized, findNearestFibonacciGeneralized, fillInitialSequences } from '~/polyphaseSort'
+import { polyphaseSort, distributeInitialSequences, generateFibonacciSequenceGeneralized, findNearestFibonacciGeneralized, fillInitialSequences, buildIntercalationTable } from '~/polyphaseSort'
 import { generateInitialSequences } from '~/utils'
 
 it('Sequencia generalizada de fibonnaci', () => {
@@ -34,6 +34,41 @@ it('Deve construir a tabela de intercalamento', () => {
 
   const filledSequences = fillInitialSequences([] as unknown as Sequences, nearestFibonacci)
   expect(filledSequences.length).toEqual(nearestFibonacci)
+})
+
+it('Deve construir a tabela de intercalação corretamente', () => {
+  const input: InputData = {
+    method: 'P',
+    mMaximumMemoryInRegisters: 3,
+    kMaximumFilesOpened: 3,
+    rInitialRuns: 3,
+    nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
+  }
+
+  const result = buildIntercalationTable(input)
+
+  // Verificar se a tabela tem o número correto de níveis
+  expect(result.length).toBe(5)
+
+  // Verificar o primeiro nível
+  expect(result[0]).toEqual([0, 0, 1])
+
+  // Verificar o segundo nível
+  expect(result[1]).toEqual([1, 1, 0])
+
+  // Verificar os níveis subsequentes
+  expect(result[2]).toEqual([0, 2, 1])
+  expect(result[3]).toEqual([2, 0, 3])
+  expect(result[4]).toEqual([5, 3, 0])
+
+  // Verificar se todos os níveis têm o número correto de arquivos
+  result.forEach(level => {
+    expect(level.length).toBe(input.kMaximumFilesOpened)
+  })
+
+  // Verificar se a soma dos elementos em cada nível segue a sequência de Fibonacci generalizada
+  const sums = result.map(level => level.reduce((a, b) => a + b, 0))
+  expect(sums).toEqual([1, 2, 3, 5, 8])
 })
 
 it.skip('Exemplo do pdf', () => {

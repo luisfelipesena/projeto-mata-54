@@ -79,27 +79,52 @@ export const fillInitialSequences = (initialSequences: Sequences, nearestFibonac
   return initialSequences as Sequences
 }
 
-export const buildIntercalationTable = (data: InputData) => {
+export const buildIntercalationTable = (data: InputData): number[][] => {
+  const { kMaximumFilesOpened } = data
   const iterationsAccordingFib = 5
-  const {
-    mMaximumMemoryInRegisters,
-    kMaximumFilesOpened,
-    rInitialRuns,
-    nListToBeSorted,
-  } = data
+  const table: number[][] = []
 
-  // First level with all files as 0 except the last that has 1 
+  // Primeiro nível: todos os arquivos como 0, exceto o último que tem 1
   const firstLevel = Array(kMaximumFilesOpened).fill(0)
   firstLevel[kMaximumFilesOpened - 1] = 1
-  // Seccond level fill all the levels with the 1 sequence except the last that has 0
+  table.push(firstLevel)
 
-  // Third level in sequence:
-  // - Should find the greatest number of sequence in the level
-  // - in next sequence should free that space and sum this value to all the other runs 
-  // - Do it until the number of iterations according fibonacci sequence
+  // Segundo nível: todos os arquivos com 1 sequência, exceto o último que tem 0
+  const secondLevel = Array(kMaximumFilesOpened).fill(1)
+  secondLevel[kMaximumFilesOpened - 1] = 0
+  table.push(secondLevel)
 
-  const secondLevel = Array(kMaximumFilesOpened).fill(0)
-  secondLevel[kMaximumFilesOpened - 1] = 1
+  // Níveis subsequentes
+  for (let i = 2; i < iterationsAccordingFib; i++) {
+    const previousLevel = table[i - 1]
+    const newLevel = [...previousLevel]
 
-  return [firstLevel, secondLevel]
+    // Encontrar o maior número de sequências no nível anterior
+    const maxSequences = Math.max(...previousLevel)
+    const maxIndex = previousLevel.indexOf(maxSequences)
+
+    // Zerar o arquivo com o maior número de sequências
+    newLevel[maxIndex] = 0
+
+    // Distribuir as sequências para os outros arquivos
+    for (let j = 0; j < kMaximumFilesOpened; j++) {
+      if (j !== maxIndex) {
+        newLevel[j] += maxSequences
+      }
+    }
+
+    table.push(newLevel)
+  }
+
+  return table
 }
+const input: InputData = {
+  method: 'P',
+  mMaximumMemoryInRegisters: 3,
+  kMaximumFilesOpened: 3,
+  rInitialRuns: 3,
+  nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
+}
+const result = buildIntercalationTable(input)
+console.log(result)
+console.log(result.map(v => v.reduce((acc, curr) => acc + curr, 0)))
