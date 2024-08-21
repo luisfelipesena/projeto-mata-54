@@ -1,4 +1,11 @@
-import type { InputData, SortResult, PhaseResult, SequenceFile, Sequences, Sequence } from './types'
+import type {
+  InputData,
+  SortResult,
+  PhaseResult,
+  SequenceFile,
+  Sequences,
+  Sequence,
+} from './types'
 import {
   calculateBeta,
   calculateAlpha,
@@ -15,17 +22,12 @@ export function polyphaseSort(data: InputData): SortResult {
   const phases: PhaseResult[] = []
   let totalWrites = 0
 
-  // Fase 0 - Geração das sequências iniciais
   const initialSequences = generateInitialSequences(
     nListToBeSorted,
     mMaximumMemoryInRegisters,
     rInitialRuns,
   )
-  const files = distributeInitialSequences(
-    initialSequences,
-    kMaximumFilesOpened,
-  )
-
+  const files = distributeInitialSequences(initialSequences, data)
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
   phases.push({
     phase: 0,
@@ -43,45 +45,60 @@ export function polyphaseSort(data: InputData): SortResult {
 
   return { phases, alpha }
 }
-export function distributeInitialSequences(initialSequences: Sequences, kMaximumFilesOpened: number): SequenceFile {
-  const files: number[][][] = Array.from({ length: kMaximumFilesOpened }, () => []);
-  const fibonacciSequence = generateFibonacciSequenceGeneralized(initialSequences.length, initialSequences.length - 1)
-  const nearestFibonacci = findNearestFibonacciGeneralized(initialSequences.length, fibonacciSequence)
+export function distributeInitialSequences(
+  initialSequences: Sequences,
+  data: InputData,
+): SequenceFile {
+  const files: number[][][] = Array.from(
+    { length: data.kMaximumFilesOpened },
+    () => [],
+  )
   return files as SequenceFile
 }
 
-export const generateFibonacciSequenceGeneralized = (maximumItemsInGeneration: number, order: number): number[] => {
-  const fibSeq = Array(maximumItemsInGeneration).fill(0);
+export const generateFibonacciSequenceGeneralized = (
+  maximumItemsInGeneration: number,
+  order: number,
+): number[] => {
+  const fibSeq = Array(maximumItemsInGeneration).fill(0)
   for (let i = 0; i < order; i++) {
-    fibSeq[i] = 1;
+    fibSeq[i] = 1
   }
   for (let i = order; i < maximumItemsInGeneration; i++) {
     for (let m = 1; m <= order; m++) {
-      fibSeq[i] += fibSeq[i - m];
+      fibSeq[i] += fibSeq[i - m]
     }
   }
-  return fibSeq;
+  return fibSeq
 }
-export const findNearestFibonacciGeneralized = (n: number, fibonacciSequence: number[]): number => {
-  let nearestFibonacci = fibonacciSequence[0];
+export const findNearestFibonacciGeneralized = (
+  n: number,
+  fibonacciSequence: number[],
+): number => {
+  let nearestFibonacci = fibonacciSequence[0]
   for (let i = 1; i < fibonacciSequence.length; i++) {
     if (fibonacciSequence[i] >= n) {
-      nearestFibonacci = fibonacciSequence[i];
-      break;
+      nearestFibonacci = fibonacciSequence[i]
+      break
     }
   }
-  return nearestFibonacci;
+  return nearestFibonacci
 }
-export const fillInitialSequences = (initialSequences: Sequences, nearestFibonacci: number): Sequences => {
+export const fillInitialSequences = (
+  initialSequences: Sequences,
+  nearestFibonacci: number,
+): Sequences => {
   for (let i = 0; i < nearestFibonacci; i++) {
     initialSequences.push([0] as Sequence)
   }
   return initialSequences as Sequences
 }
 
-export const buildIntercalationTable = (data: InputData): number[][] => {
+export const buildIntercalationTable = (
+  data: Pick<InputData, 'kMaximumFilesOpened'>,
+  iterationsAccordingFib: number,
+): number[][] => {
   const { kMaximumFilesOpened } = data
-  const iterationsAccordingFib = 5
   const table: number[][] = []
 
   // Primeiro nível: todos os arquivos como 0, exceto o último que tem 1
@@ -125,6 +142,4 @@ const input: InputData = {
   rInitialRuns: 3,
   nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
 }
-const result = buildIntercalationTable(input)
-console.log(result)
-console.log(result.map(v => v.reduce((acc, curr) => acc + curr, 0)))
+const result = buildIntercalationTable({ kMaximumFilesOpened: 3 }, 5)

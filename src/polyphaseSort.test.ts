@@ -1,6 +1,12 @@
 import { it, expect } from 'bun:test'
 import type { InputData, Sequence, Sequences } from './types'
-import { polyphaseSort, distributeInitialSequences, generateFibonacciSequenceGeneralized, findNearestFibonacciGeneralized, fillInitialSequences, buildIntercalationTable } from '~/polyphaseSort'
+import {
+  polyphaseSort,
+  generateFibonacciSequenceGeneralized,
+  findNearestFibonacciGeneralized,
+  fillInitialSequences,
+  buildIntercalationTable,
+} from '~/polyphaseSort'
 import { generateInitialSequences } from '~/utils'
 
 it('Sequencia generalizada de fibonnaci', () => {
@@ -8,31 +14,60 @@ it('Sequencia generalizada de fibonnaci', () => {
   expect(result).toEqual([1, 1, 1, 1, 4, 7, 13, 25, 49, 94])
 })
 it('Deve encontrar o número mais próximo de fibonacci', () => {
-  const result = findNearestFibonacciGeneralized(9, [1, 1, 2, 3, 5, 8, 13, 21, 34, 55])
+  const result = findNearestFibonacciGeneralized(
+    9,
+    [1, 1, 2, 3, 5, 8, 13, 21, 34, 55],
+  )
   expect(result).toEqual(13)
 })
 it('Deve completar as sequencias iniciais com sequencias vazias', () => {
   const kMaximumFilesOpened = 4
   const mMaximumMemoryInRegisters = 3
   const rInitialRuns = 4
-  const initialSequences = generateInitialSequences([7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3], mMaximumMemoryInRegisters, rInitialRuns)
-  const fibonacciSequence = generateFibonacciSequenceGeneralized(10, kMaximumFilesOpened - 1)
-  const nearestFibonacci = findNearestFibonacciGeneralized(initialSequences.length, fibonacciSequence)
+  const initialSequences = generateInitialSequences(
+    [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
+    mMaximumMemoryInRegisters,
+    rInitialRuns,
+  )
+  const fibonacciSequence = generateFibonacciSequenceGeneralized(
+    10,
+    kMaximumFilesOpened - 1,
+  )
+  const nearestFibonacci = findNearestFibonacciGeneralized(
+    initialSequences.length,
+    fibonacciSequence,
+  )
   expect(nearestFibonacci).toEqual(5)
 
-  const filledSequences = fillInitialSequences([] as unknown as Sequences, nearestFibonacci)
+  const filledSequences = fillInitialSequences(
+    [] as unknown as Sequences,
+    nearestFibonacci,
+  )
   expect(filledSequences.length).toEqual(nearestFibonacci)
 })
 it('Deve construir a tabela de intercalamento', () => {
   const kMaximumFilesOpened = 4
   const mMaximumMemoryInRegisters = 3
   const rInitialRuns = 4
-  const initialSequences = generateInitialSequences([7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3], mMaximumMemoryInRegisters, rInitialRuns)
-  const fibonacciSequence = generateFibonacciSequenceGeneralized(10, kMaximumFilesOpened - 1)
-  const nearestFibonacci = findNearestFibonacciGeneralized(initialSequences.length, fibonacciSequence)
+  const initialSequences = generateInitialSequences(
+    [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
+    mMaximumMemoryInRegisters,
+    rInitialRuns,
+  )
+  const fibonacciSequence = generateFibonacciSequenceGeneralized(
+    10,
+    kMaximumFilesOpened - 1,
+  )
+  const nearestFibonacci = findNearestFibonacciGeneralized(
+    initialSequences.length,
+    fibonacciSequence,
+  )
   expect(nearestFibonacci).toEqual(5)
 
-  const filledSequences = fillInitialSequences([] as unknown as Sequences, nearestFibonacci)
+  const filledSequences = fillInitialSequences(
+    [] as unknown as Sequences,
+    nearestFibonacci,
+  )
   expect(filledSequences.length).toEqual(nearestFibonacci)
 })
 
@@ -45,7 +80,7 @@ it('Deve construir a tabela de intercalação corretamente', () => {
     nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
   }
 
-  const result = buildIntercalationTable(input)
+  const result = buildIntercalationTable(input, 5)
 
   // Verificar se a tabela tem o número correto de níveis
   expect(result.length).toBe(5)
@@ -62,12 +97,12 @@ it('Deve construir a tabela de intercalação corretamente', () => {
   expect(result[4]).toEqual([5, 3, 0])
 
   // Verificar se todos os níveis têm o número correto de arquivos
-  result.forEach(level => {
+  result.forEach((level) => {
     expect(level.length).toBe(input.kMaximumFilesOpened)
   })
 
   // Verificar se a soma dos elementos em cada nível segue a sequência de Fibonacci generalizada
-  const sums = result.map(level => level.reduce((a, b) => a + b, 0))
+  const sums = result.map((level) => level.reduce((a, b) => a + b, 0))
   expect(sums).toEqual([1, 2, 3, 5, 8])
 })
 
@@ -86,17 +121,4 @@ it.skip('Exemplo do pdf', () => {
   ] as Sequence
   // console.log(result)
   expect(result.phases.at(-1)?.sequences[0]).toEqual(expectedSortedSequence)
-})
-
-it.skip('distributeInitialSequences', () => {
-  const initialSequences = Array.from({ length: 19 }, (_, i) => [
-    i * 3 + 1,
-    i * 3 + 2,
-    i * 3 + 3,
-  ]) as unknown as Sequences
-  const kMaximumFilesOpened = 6
-  const result = distributeInitialSequences(
-    initialSequences,
-    kMaximumFilesOpened,
-  )
 })
