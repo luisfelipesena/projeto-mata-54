@@ -124,8 +124,7 @@ it('Deve distribuir as sequencias iniciais corretamente', () => {
   // console.log(files)
 })
 
-
-it.skip('Exemplo do pdf', () => {
+it('Exemplo do pdf', () => {
   const input: InputData = {
     method: 'P',
     mMaximumMemoryInRegisters: 3,

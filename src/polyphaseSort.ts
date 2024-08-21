@@ -10,6 +10,8 @@ import {
   calculateBeta,
   calculateAlpha,
   generateInitialSequences,
+  mergeMultipleSequences,
+  deepCopy,
 } from './utils'
 
 export function polyphaseSort(data: InputData): SortResult {
@@ -33,12 +35,45 @@ export function polyphaseSort(data: InputData): SortResult {
     phase: 0,
     beta: beta0,
     sequences: initialSequences,
-    filesOpened: files,
+    filesOpened: deepCopy(files) as SequenceFile,
   })
   totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
 
-  // Fases de intercalamento (logica polifásica)
-  const currentSequences = initialSequences
+  const checkIfAllSequencesHasBeenMerged = (files: SequenceFile) => {
+    return (
+      files.map((file) => file.length).reduce((acc, curr) => acc + curr, 0) ===
+      1
+    )
+  }
+  const hasAnyFileEmpty = (files: SequenceFile) => {
+    return !!files.find((file) => file.length === 0)
+  }
+  let phase = 1
+  while (!checkIfAllSequencesHasBeenMerged(files)) {
+    const freeFileIndex = files.findIndex((file) => file.length === 0)
+    const busyFiles = files.filter((file, idx) => file.length > 0 && idx !== freeFileIndex)
+    while (!hasAnyFileEmpty(busyFiles as SequenceFile)) {
+      const sequencesToMerge = busyFiles.map((file) => file[0] || [])
+      const mergedSequence = mergeMultipleSequences(sequencesToMerge)
+      busyFiles.forEach((busyFile) => busyFile.shift())
+      // Remove the first sequence of each file!
+      if (files[freeFileIndex].length === 0) {
+        files[freeFileIndex] = [mergedSequence] as Sequences
+      } else if (files[freeFileIndex].length > 0) {
+        files[freeFileIndex].push(mergedSequence)
+      }
+    }
+    const currentSequences = files.flat() as Sequences
+    const beta = calculateBeta(mMaximumMemoryInRegisters, currentSequences)
+    phases.push({
+      phase,
+      beta,
+      sequences: currentSequences,
+      filesOpened: deepCopy(files) as SequenceFile,
+    })
+    phase++
+    totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
+  }
 
   // Cálculo final de alpha
   const alpha = calculateAlpha(totalWrites, nListToBeSorted.length)
@@ -93,7 +128,6 @@ export function distributeInitialSequences(
 
   return files as SequenceFile
 }
-
 export const generateFibonacciSequenceGeneralizedUntilGreaterThan = (
   greaterThanValue: number,
   order: number,
