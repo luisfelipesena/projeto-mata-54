@@ -2,7 +2,7 @@ import { it, expect } from 'bun:test'
 import type { InputData, Sequence, Sequences } from './types'
 import {
   polyphaseSort,
-  generateFibonacciSequenceGeneralized,
+  generateFibonacciSequenceGeneralizedUntilGreaterThan,
   findNearestFibonacciGeneralized,
   fillInitialSequences,
   buildIntercalationTable,
@@ -10,7 +10,7 @@ import {
 import { generateInitialSequences } from '~/utils'
 
 it('Sequencia generalizada de fibonnaci', () => {
-  const result = generateFibonacciSequenceGeneralized(10, 4)
+  const result = generateFibonacciSequenceGeneralizedUntilGreaterThan(10, 4)
   expect(result).toEqual([1, 1, 1, 1, 4, 7, 13, 25, 49, 94])
 })
 it('Deve encontrar o número mais próximo de fibonacci', () => {
@@ -29,7 +29,7 @@ it('Deve completar as sequencias iniciais com sequencias vazias', () => {
     mMaximumMemoryInRegisters,
     rInitialRuns,
   )
-  const fibonacciSequence = generateFibonacciSequenceGeneralized(
+  const fibonacciSequence = generateFibonacciSequenceGeneralizedUntilGreaterThan(
     10,
     kMaximumFilesOpened - 1,
   )
@@ -54,7 +54,7 @@ it('Deve construir a tabela de intercalamento', () => {
     mMaximumMemoryInRegisters,
     rInitialRuns,
   )
-  const fibonacciSequence = generateFibonacciSequenceGeneralized(
+  const fibonacciSequence = generateFibonacciSequenceGeneralizedUntilGreaterThan(
     10,
     kMaximumFilesOpened - 1,
   )

@@ -53,21 +53,37 @@ export function distributeInitialSequences(
     { length: data.kMaximumFilesOpened },
     () => [],
   )
+  const fibonacciSequence = generateFibonacciSequenceGeneralizedUntilGreaterThan(
+    initialSequences.length,
+    data.kMaximumFilesOpened,
+  )
+  const nearestFibonacci = findNearestFibonacciGeneralized(
+    initialSequences.length,
+    fibonacciSequence,
+  )
+  const filledSequences = fillInitialSequences(
+    [] as unknown as Sequences,
+    nearestFibonacci,
+  )
   return files as SequenceFile
 }
 
-export const generateFibonacciSequenceGeneralized = (
-  maximumItemsInGeneration: number,
+export const generateFibonacciSequenceGeneralizedUntilGreaterThan = (
+  greaterThanValue: number,
   order: number,
 ): number[] => {
-  const fibSeq = Array(maximumItemsInGeneration).fill(0)
+  const fibSeq: number[] = []
+  let lastValue = 0
   for (let i = 0; i < order; i++) {
-    fibSeq[i] = 1
+    fibSeq.push(1)
   }
-  for (let i = order; i < maximumItemsInGeneration; i++) {
+  let i = order
+  while (i < greaterThanValue) {
     for (let m = 1; m <= order; m++) {
-      fibSeq[i] += fibSeq[i - m]
+      fibSeq[i] = (fibSeq[i] || 0) + fibSeq[i - m]
+      lastValue = fibSeq[i]
     }
+    i++
   }
   return fibSeq
 }
