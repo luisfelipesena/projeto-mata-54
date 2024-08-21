@@ -6,12 +6,13 @@ import {
   findNearestFibonacciGeneralized,
   fillInitialSequences,
   buildIntercalationTable,
+  distributeInitialSequences,
 } from '~/polyphaseSort'
 import { generateInitialSequences } from '~/utils'
 
 it('Sequencia generalizada de fibonnaci', () => {
   const result = generateFibonacciSequenceGeneralizedUntilGreaterThan(10, 4)
-  expect(result).toEqual([1, 1, 1, 1, 4, 7, 13, 25, 49, 94])
+  expect(result).toEqual([1, 1, 1, 1, 4, 7, 13])
 })
 it('Deve encontrar o número mais próximo de fibonacci', () => {
   const result = findNearestFibonacciGeneralized(
@@ -105,6 +106,24 @@ it('Deve construir a tabela de intercalação corretamente', () => {
   const sums = result.map((level) => level.reduce((a, b) => a + b, 0))
   expect(sums).toEqual([1, 2, 3, 5, 8])
 })
+
+it('Deve distribuir as sequencias iniciais corretamente', () => {
+  const input: InputData = {
+    method: 'P',
+    mMaximumMemoryInRegisters: 3,
+    kMaximumFilesOpened: 4,
+    rInitialRuns: 3,
+    nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
+  }
+  const initialSequences = generateInitialSequences(
+    input.nListToBeSorted,
+    input.mMaximumMemoryInRegisters,
+    input.rInitialRuns,
+  )
+  const files = distributeInitialSequences(initialSequences, input)
+  // console.log(files)
+})
+
 
 it.skip('Exemplo do pdf', () => {
   const input: InputData = {

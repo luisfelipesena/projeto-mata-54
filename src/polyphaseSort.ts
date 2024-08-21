@@ -49,22 +49,48 @@ export function distributeInitialSequences(
   initialSequences: Sequences,
   data: InputData,
 ): SequenceFile {
-  const files: number[][][] = Array.from(
+  const files = Array.from(
     { length: data.kMaximumFilesOpened },
-    () => [],
-  )
-  const fibonacciSequence = generateFibonacciSequenceGeneralizedUntilGreaterThan(
-    initialSequences.length,
-    data.kMaximumFilesOpened,
-  )
+    () => [] as unknown as Sequences,
+  ) as SequenceFile
+
+  const fibonacciSequence =
+    generateFibonacciSequenceGeneralizedUntilGreaterThan(
+      initialSequences.length,
+      data.kMaximumFilesOpened,
+    )
   const nearestFibonacci = findNearestFibonacciGeneralized(
     initialSequences.length,
     fibonacciSequence,
   )
-  const filledSequences = fillInitialSequences(
-    [] as unknown as Sequences,
-    nearestFibonacci,
+  const table = buildIntercalationTable(data, nearestFibonacci)
+  const sumOfEachLevel = table.map((level) =>
+    level.reduce((acc, curr) => acc + curr, 0),
   )
+
+  const lastLevelSumNumber = sumOfEachLevel.at(-1)!
+  const filledSequences = fillInitialSequences(
+    initialSequences,
+    lastLevelSumNumber || 0,
+  )
+  // Table return something like [ [ 0, 0, 0, 1 ], [ 1, 1, 1, 0 ], [ 0, 2, 2, 1 ], [ 2, 0, 4, 3 ] ]
+  const lastLevelTable = table.at(-1)!
+
+  // You should round robbing to distribute the sequences according the map `lastLevelTable` says how many sequences each file should have
+  let i = 0
+  let j = 0
+  while (
+    files.map((file) => file.length).reduce((acc, curr) => acc + curr, 0) !==
+    lastLevelSumNumber
+  ) {
+    const idx = j % lastLevelTable.length
+    if (files[idx].length < lastLevelTable[idx]) {
+      files[idx].push(filledSequences[i])
+      i++
+    }
+    j++
+  }
+
   return files as SequenceFile
 }
 
@@ -78,7 +104,7 @@ export const generateFibonacciSequenceGeneralizedUntilGreaterThan = (
     fibSeq.push(1)
   }
   let i = order
-  while (i < greaterThanValue) {
+  while (lastValue < greaterThanValue) {
     for (let m = 1; m <= order; m++) {
       fibSeq[i] = (fibSeq[i] || 0) + fibSeq[i - m]
       lastValue = fibSeq[i]
@@ -104,8 +130,8 @@ export const fillInitialSequences = (
   initialSequences: Sequences,
   nearestFibonacci: number,
 ): Sequences => {
-  for (let i = 0; i < nearestFibonacci; i++) {
-    initialSequences.push([0] as Sequence)
+  while (initialSequences.length < nearestFibonacci) {
+    initialSequences.push([] as unknown as Sequence)
   }
   return initialSequences as Sequences
 }
