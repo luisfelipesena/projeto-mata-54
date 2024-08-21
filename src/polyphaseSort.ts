@@ -92,7 +92,7 @@ export function distributeInitialSequences(
   const fibonacciSequence =
     generateFibonacciSequenceGeneralizedUntilGreaterThan(
       initialSequences.length,
-      data.kMaximumFilesOpened,
+      data.kMaximumFilesOpened - 1,
     )
   const nearestFibonacci = findNearestFibonacciGeneralized(
     initialSequences.length,
@@ -103,13 +103,19 @@ export function distributeInitialSequences(
     level.reduce((acc, curr) => acc + curr, 0),
   )
 
-  const lastLevelSumNumber = sumOfEachLevel.at(-1)!
+  const lastLevelTable = (() => {
+    const tableByLength = table.map((level) => level.reduce((acc, curr) => acc + curr, 0))
+    const findLowestDifference = tableByLength.map(v => Math.abs(v - initialSequences.length))
+    const lowestDifference = Math.min(...findLowestDifference)
+    const indexOfLowestDifference = findLowestDifference.indexOf(lowestDifference)
+    return table[indexOfLowestDifference]
+  })()
+
+  const lastLevelSumNumber = lastLevelTable.reduce((acc, curr) => acc + curr, 0)
   const filledSequences = fillInitialSequences(
-    initialSequences,
+    deepCopy(initialSequences) as any,
     lastLevelSumNumber || 0,
   )
-  // Table return something like [ [ 0, 0, 0, 1 ], [ 1, 1, 1, 0 ], [ 0, 2, 2, 1 ], [ 2, 0, 4, 3 ] ]
-  const lastLevelTable = table.at(-1)!
 
   // You should round robbing to distribute the sequences according the map `lastLevelTable` says how many sequences each file should have
   let i = 0

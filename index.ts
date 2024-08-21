@@ -35,7 +35,6 @@ function processInput(input: string[]): void {
     console.log(`Método ${method} não reconhecido.`)
     return
   }
-  console.log(result)
 
   // Exibe o resultado
   result.phases.forEach((phase) => {
