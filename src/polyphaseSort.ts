@@ -80,6 +80,7 @@ export function polyphaseSort(data: InputData): SortResult {
 
   return { phases, alpha }
 }
+
 export function distributeInitialSequences(
   initialSequences: Sequences,
   data: InputData,
@@ -217,11 +218,3 @@ export const buildIntercalationTable = (
 
   return table
 }
-const input: InputData = {
-  method: 'P',
-  mMaximumMemoryInRegisters: 3,
-  kMaximumFilesOpened: 3,
-  rInitialRuns: 3,
-  nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
-}
-const result = buildIntercalationTable({ kMaximumFilesOpened: 3 }, 5)
