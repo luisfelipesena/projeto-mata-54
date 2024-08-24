@@ -53,5 +53,5 @@ function processInput(input: string[]): void {
 }
 
 // Teste com exemplo de entrada
-const inputExample = ['P', '3 4 3', '7 1 5 6 3 8 2 10 4 9 1 3 7 4 1 2 3']
+const inputExample = ['C', '3 4 3', '7 1 5 6 3 8 2 10 4 9 1 3 7 4 1 2 3']
 processInput(inputExample)
