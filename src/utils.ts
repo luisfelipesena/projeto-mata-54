@@ -1,5 +1,5 @@
 import { MinHeap } from '~/minHeap'
-import type { Sequence, Sequences } from '~/types'
+import type { PhaseResult, Sequence, SequenceFile, Sequences } from '~/types'
 
 export function calculateBeta(m: number, sequences: number[][]): number {
   const totalLength = sequences.reduce((acc, seq) => acc + seq.length, 0)
@@ -108,3 +108,16 @@ export function mergeMultipleSequences(sequences: Sequence[]): Sequence {
 }
 
 export const deepCopy = <T>(array: T[]): T[] => JSON.parse(JSON.stringify(array))
+
+export const printFilesOpened = (filesOpened: SequenceFile) => {
+  // Should log how many sequences are in each file and theirs lenghts
+  filesOpened.forEach((file, i) => {
+    console.log(`File ${i} - ${file.length} sequences: ${file.join(' ')}`)
+  })
+}
+export const printFilesOpenedPhase = (phase: PhaseResult[]) => {
+  for (let i = 0; i < phase.length; i++) {
+    console.log(`Phase ${i}`)
+    printFilesOpened(phase[i].filesOpened)
+  }
+}

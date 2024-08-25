@@ -31,47 +31,58 @@ export function cascadeSort(data: InputData): SortResult {
     sequences: initialSequences,
     filesOpened: deepCopy(files) as SequenceFile,
   })
-  totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
+  let filesCopy = deepCopy(files) as SequenceFile
+  let level = filesCopy.length - 2
+  let firstPass = true
 
-  const checkIfAllSequencesHasBeenMerged = (files: SequenceFile) => {
-    return (
-      files.map((file) => file.length).reduce((acc, curr) => acc + curr, 0) ===
-      1
-    )
-  }
-  const hasAnyFileEmpty = (files: SequenceFile) => {
-    return !!files.find((file) => file.length === 0)
-  }
-  let phase = 1
-  while (!checkIfAllSequencesHasBeenMerged(files)) {
-    const freeFileIndex = files.findIndex((file) => file.length === 0)
-    const busyFiles = files.filter((file, idx) => file.length > 0 && idx !== freeFileIndex)
-    while (!hasAnyFileEmpty(busyFiles as SequenceFile)) {
-      const sequencesToMerge = busyFiles.map((file) => file[0] || [])
-      const mergedSequence = mergeMultipleSequences(sequencesToMerge)
-      busyFiles.forEach((busyFile) => busyFile.shift())
-      // Remove the first sequence of each file!
-      if (files[freeFileIndex].length === 0) {
-        files[freeFileIndex] = [mergedSequence] as Sequences
-      } else if (files[freeFileIndex].length > 0) {
-        files[freeFileIndex].push(mergedSequence)
+  totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
+  while (level >= 0) {
+    for (let p = filesCopy.length - 1; p >= 1; p--) {
+      if (p === 1) {
+        ;[filesCopy[1], filesCopy[2]] = [filesCopy[2], filesCopy[1]]
+      } else if (firstPass && filesCopy[p - 1].length === 0) {
+        // Simulate p-way merge for first pass with empty tape
+        ;[filesCopy[p], filesCopy[p + 1]] = [filesCopy[p + 1], filesCopy[p]]
+      } else {
+        // Perform actual p-way merge
+        const sequencesToMerge = filesCopy
+          .slice(1, p + 1)
+          .map((file) => file.shift())
+          .filter(Boolean) as Sequence[]
+        const mergedSequence = mergeMultipleSequences(sequencesToMerge)
+        filesCopy[p].push(mergedSequence)
+        totalWrites += mergedSequence.length
+      }
+
+      // Rewind tapes (in our case, just ensure the arrays are properly managed)
+      if (filesCopy[p].length === 0) {
+        filesCopy[p] = [] as unknown as Sequences
+      }
+      if (filesCopy[p].length === 0) {
+        filesCopy[p] = [] as unknown as Sequences
       }
     }
-    const currentSequences = files.flat() as Sequences
+
+    // Record phase result
+    const currentSequences = filesCopy.flat() as Sequences
     const beta = calculateBeta(data.mMaximumMemoryInRegisters, currentSequences)
     phases.push({
-      phase,
+      phase: phases.length + 1,
       beta,
       sequences: currentSequences,
-      filesOpened: deepCopy(files) as SequenceFile,
+      filesOpened: deepCopy(filesCopy) as SequenceFile,
     })
-    phase++
-    totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
+
+    // Prepare for next level
+    level--
+    firstPass = false
+    filesCopy = [
+      filesCopy[filesCopy.length - 1],
+      ...filesCopy.slice(0, filesCopy.length - 1),
+    ] as SequenceFile
   }
 
-  // Cálculo final de alpha
   const alpha = calculateAlpha(totalWrites, data.nListToBeSorted.length)
-
   return { phases, alpha }
 }
 
@@ -87,10 +98,15 @@ export function distributeInitialSequences(
   const table = buildIntercalationTableCascade(data, initialSequences.length)
 
   const lastLevelTable = (() => {
-    const tableByLength = table.map((level) => level.reduce((acc, curr) => acc + curr, 0))
-    const findLowestDifference = tableByLength.map(v => Math.abs(v - initialSequences.length))
+    const tableByLength = table.map((level) =>
+      level.reduce((acc, curr) => acc + curr, 0),
+    )
+    const findLowestDifference = tableByLength.map((v) =>
+      Math.abs(v - initialSequences.length),
+    )
     const lowestDifference = Math.min(...findLowestDifference)
-    const indexOfLowestDifference = findLowestDifference.indexOf(lowestDifference)
+    const indexOfLowestDifference =
+      findLowestDifference.indexOf(lowestDifference)
     return table[indexOfLowestDifference]
   })()
 
@@ -184,7 +200,7 @@ export const buildIntercalationTableCascade = (
     for (let i = 0; i < onlyWorkingFiles; i++) {
       const prevLevel = table[n - 1]
       const an = prevLevel[0]
-      const nSlices = prevLevel.slice(1, (prevLevel.length - i))
+      const nSlices = prevLevel.slice(1, prevLevel.length - i)
       const sumSlices = nSlices.reduce((acc, curr) => acc + curr, 0)
       newLevel[i] = an + sumSlices
     }
@@ -194,4 +210,61 @@ export const buildIntercalationTableCascade = (
   }
 
   return table
+}
+
+export function cascadeMerge(files: SequenceFile, data: InputData): SortResult {
+  const phases: PhaseResult[] = []
+  let filesCopy = deepCopy(files) as SequenceFile
+  let totalWrites = 0
+  let level = filesCopy.length - 2
+  let firstPass = true
+
+  while (level >= 0) {
+    for (let p = filesCopy.length - 1; p >= 1; p--) {
+      if (p === 1) {
+        ;[filesCopy[1], filesCopy[2]] = [filesCopy[2], filesCopy[1]]
+      } else if (firstPass && filesCopy[p - 1].length === 0) {
+        // Simulate p-way merge for first pass with empty tape
+        ;[filesCopy[p], filesCopy[p + 1]] = [filesCopy[p + 1], filesCopy[p]]
+      } else {
+        // Perform actual p-way merge
+        const sequencesToMerge = filesCopy
+          .slice(1, p + 1)
+          .map((file) => file.shift())
+          .filter(Boolean) as Sequence[]
+        const mergedSequence = mergeMultipleSequences(sequencesToMerge)
+        filesCopy[p].push(mergedSequence)
+        totalWrites += mergedSequence.length
+      }
+
+      // Rewind tapes (in our case, just ensure the arrays are properly managed)
+      if (filesCopy[p].length === 0) {
+        filesCopy[p] = [] as unknown as Sequences
+      }
+      if (filesCopy[p].length === 0) {
+        filesCopy[p] = [] as unknown as Sequences
+      }
+    }
+
+    // Record phase result
+    const currentSequences = filesCopy.flat() as Sequences
+    const beta = calculateBeta(data.mMaximumMemoryInRegisters, currentSequences)
+    phases.push({
+      phase: phases.length + 1,
+      beta,
+      sequences: currentSequences,
+      filesOpened: deepCopy(filesCopy) as SequenceFile,
+    })
+
+    // Prepare for next level
+    level--
+    firstPass = false
+    filesCopy = [
+      filesCopy[filesCopy.length - 1],
+      ...filesCopy.slice(0, filesCopy.length - 1),
+    ] as SequenceFile
+  }
+
+  const alpha = calculateAlpha(totalWrites, data.nListToBeSorted.length)
+  return { phases, alpha }
 }

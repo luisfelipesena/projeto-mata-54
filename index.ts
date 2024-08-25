@@ -44,7 +44,6 @@ function processInput(input: string[]): void {
         return `${acc} {${file.join(' ')}}`
       }, '')
       if (sequences) {
-
         console.log(`${index + 1}: ${sequences}`)
       }
     })
