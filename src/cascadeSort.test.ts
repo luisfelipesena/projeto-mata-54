@@ -107,6 +107,7 @@ it('CascadeMerge - deve realizar a mesclagem em cascata corretamente', () => {
       // Reset D and M (they will remain zero)
       D.fill(0)
       M.fill(0)
+      console.log('tape', tape.map((t) => t.sequences.length))
     }
 
     // Retorna o resultado final
