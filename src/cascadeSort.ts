@@ -37,48 +37,37 @@ export function cascadeSort(data: InputData): SortResult {
   })
   const filesCopy = deepCopy(files) as SequenceFile
 
-  totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
+  totalWrites += initialSequences.length // Cada sequência inicial é escrita uma vez
   const T = filesCopy.length // Número total de fitas
-  // AA[k]: Representa o número inicial de sequências em cada nível.
   const aa = filesCopy.map((sequences) => sequences.length)
-  // D[j]: Representa o número de sequências restantes em cada fita.
   const D = [...aa]
-  // M[k]: Representa o número de sequências a serem mescladas em cada nível.
   const M = new Array(T).fill(0)
   for (let k = 1; k < T; k++) {
-    M[k] = aa[k + 1] || 0 // C7. Set M[k] <- AA[k+1] for 1 <= k < T
+    M[k] = aa[k + 1] || 0
   }
-  // FIRST: Indica se é a primeira passagem de mesclagem.
-  let first = 1 // C7. Set FIRST <- 1
-  // TAPE[j]: Representa as fitas de entrada/saída.
+  let first = 1
   const tape = filesCopy.map((sequences, index) => ({ index, sequences }))
-  // l = level
   let l = T - 1
-  while (l >= 0 && tape.map((t) => t.sequences.length).reduce((acc, curr) => acc + curr, 0) !== 1) {
-    // C8. [Cascade.]
+
+  while (
+    l >= 0 &&
+    tape.map((t) => t.sequences.length).reduce((acc, curr) => acc + curr, 0) !== 1
+  ) {
     for (let p = T - 1; p >= 1; p--) {
       if (p === 1) {
-        // C8. If p = 1, simulate the one-way merge
-        // Rebobinar TAPE[2] (não é necessário em arrays)
-        // Trocar TAPE[1] e TAPE[2]
         ;[tape[1], tape[2]] = [tape[2], tape[1]]
       } else if (first === 1 && D[p - 1] === M[p - 1]) {
-        // C8. Otherwise if FIRST = 1 and D[p-1] = M[p-1]
         if (p < T - 1) {
           ;[tape[p], tape[p + 1]] = [tape[p + 1], tape[p]]
         }
-        // Subtrair M[p - 1] de D[1], ..., D[p-1] e M[1], ..., M[p-1]
         for (let j = 1; j < p; j++) {
           D[j] -= M[p - 1]
           M[j] -= M[p - 1]
         }
       } else {
-        // C8. Otherwise
-        // Subtrair M[p - 1] de M[1], ..., M[p-1]
         for (let j = 1; j < p; j++) {
           M[j] -= M[p - 1]
         }
-        // Merge one run from each TAPE[j]
         const sequencesToMerge = [] as unknown as Sequences
         for (let j = 1; j <= p; j++) {
           if (D[j] >= M[j] && tape[j].sequences.length > 0) {
@@ -97,9 +86,7 @@ export function cascadeSort(data: InputData): SortResult {
             tape[1].sequences.push(mergedSequence)
           }
         }
-        // Continue until TAPE[p] is empty (handled by the loop)
       }
-      // Rewind TAPE[p] and TAPE[p+1] (não é necessário em arrays)
     }
     const currentSequences = filesCopy.flat() as Sequences
     const beta = calculateBeta(data.mMaximumMemoryInRegisters, currentSequences)
@@ -109,13 +96,10 @@ export function cascadeSort(data: InputData): SortResult {
       sequences: currentSequences,
       filesOpened: deepCopy(filesCopy) as SequenceFile,
     })
-    totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
-    // C9. [Down a level.]
+    totalWrites += currentSequences.length // Adicionar o número de sequências gravadas
     l--
     first = 0
-    // Rotate tapes: (TAPE[1], ..., TAPE[T]) <- (TAPE[T], ..., TAPE[1])
     tape.unshift(tape.pop()!)
-    // Reset D and M (they will remain zero)
     D.fill(0)
     M.fill(0)
   }
