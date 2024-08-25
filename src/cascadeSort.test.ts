@@ -43,28 +43,27 @@ it('CascadeMerge - deve realizar a mesclagem em cascata corretamente', () => {
     // M[k]: Representa o número de sequências a serem mescladas em cada nível.
     const M = new Array(T).fill(0)
     for (let k = 1; k < T; k++) {
-      M[k] = aa[k + 1] || 0 // Use 0 se AA[k + 1] não existir
+      M[k] = aa[k + 1] || 0 // C7. Set M[k] <- AA[k+1] for 1 <= k < T
     }
     // FIRST: Indica se é a primeira passagem de mesclagem.
-    let first = 1
+    let first = 1 // C7. Set FIRST <- 1
     // TAPE[j]: Representa as fitas de entrada/saída.
     const tape = file.map((sequences, index) => ({ index, sequences }))
     // l = level
     let l = T - 1
+
     while (l > 0) {
+      // C8. [Cascade.]
       for (let p = T - 1; p >= 1; p--) {
         if (p === 1) {
-          // Simula a mesclagem de uma via
+          // C8. If p = 1, simulate the one-way merge
           // Rebobinar TAPE[2] (não é necessário em arrays)
           // Trocar TAPE[1] e TAPE[2]
           ;[tape[1], tape[2]] = [tape[2], tape[1]]
         } else if (first === 1 && D[p - 1] === M[p - 1]) {
-          // Simula a mesclagem de p vias
-          // Trocar TAPE[p] e TAPE[p + 1]
+          // C8. Otherwise if FIRST = 1 and D[p-1] = M[p-1]
           if (p < T - 1) {
             ;[tape[p], tape[p + 1]] = [tape[p + 1], tape[p]]
-          } else {
-            // Se p é T-1, apenas "rebobinamos" TAPE[p] (não fazemos nada em arrays)
           }
           // Subtrair M[p - 1] de D[1], ..., D[p-1] e M[1], ..., M[p-1]
           for (let j = 1; j < p; j++) {
@@ -72,7 +71,12 @@ it('CascadeMerge - deve realizar a mesclagem em cascata corretamente', () => {
             M[j] -= M[p - 1]
           }
         } else {
-          // Implementar a lógica de mesclagem de p vias aqui
+          // C8. Otherwise
+          // Subtrair M[p - 1] de M[1], ..., M[p-1]
+          for (let j = 1; j < p; j++) {
+            M[j] -= M[p - 1]
+          }
+          // Merge one run from each TAPE[j]
           const sequencesToMerge = [] as unknown as Sequences
           for (let j = 1; j <= p; j++) {
             if (D[j] >= M[j] && tape[j].sequences.length > 0) {
@@ -88,19 +92,25 @@ it('CascadeMerge - deve realizar a mesclagem em cascata corretamente', () => {
             if (p < T - 1) {
               tape[p + 1].sequences.push(mergedSequence)
             } else {
-              // Se p é T-1, adicionamos a sequência mesclada à primeira fita (tape[1])
               tape[1].sequences.push(mergedSequence)
             }
           }
+          // Continue until TAPE[p] is empty (handled by the loop)
         }
+        // Rewind TAPE[p] and TAPE[p+1] (não é necessário em arrays)
       }
+      // C9. [Down a level.]
       l--
-      first = 0 // Não é mais a primeira passagem
+      first = 0
+      // Rotate tapes: (TAPE[1], ..., TAPE[T]) <- (TAPE[T], ..., TAPE[1])
+      tape.unshift(tape.pop()!)
+      // Reset D and M (they will remain zero)
+      D.fill(0)
+      M.fill(0)
     }
 
     // Retorna o resultado final
-    console.log(tape)
-    return file
+    return tape
   }
   const result = mergeCascadePass(file)
 
