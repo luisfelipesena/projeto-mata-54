@@ -17,8 +17,8 @@ with open('resultados_experimento.csv', 'r') as file:
         })
 
 # Definir cores e estilos de linha para cada k
-cores = ['#4bc0c0', '#ff6384', '#ffcd56', '#36a2eb']
-estilos_linha = ['-', '--', '-.', ':']
+cores = ['#4bc0c0', '#ff6384', '#ffcd56', '#36a2eb', '#9966ff']
+estilos_linha = ['-', '--', '-.', ':', '-']
 
 # Criar um gráfico para cada método
 metodos = set(resultado['metodo'] for resultado in resultados)
