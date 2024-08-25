@@ -1,38 +1,20 @@
 import { balancedMultiWaySort } from '~/balancedMultiwaySort'
 import { cascadeSort } from '~/cascadeSort'
 import { polyphaseSort } from '~/polyphaseSort'
-import type { InputData, SortResult, SortMethod } from '~/types'
+import type { InputData, SortResult } from '~/types'
 
 // Função principal para processar a entrada e executar o método de ordenação
-function processInput(input: string[]): void {
-  const method = input[0] as SortMethod
-  const [mMaximumMemoryInRegisters, kMaximumFilesOpened, rInitialRuns] =
-    input[1].split(' ').map(Number)
-  const nListToBeSorted = input[2].split(' ').map(Number)
-
-  const data: InputData = {
-    method,
-    kMaximumFilesOpened,
-    mMaximumMemoryInRegisters,
-    rInitialRuns,
-    nListToBeSorted,
-  }
+export function processInput(data: InputData) {
 
   let result: SortResult
-  if (method === 'B') {
-    result = balancedMultiWaySort({
-      kMaximumFilesOpened: kMaximumFilesOpened,
-      mMaximumMemoryInRegisters: mMaximumMemoryInRegisters,
-      rInitialRuns: rInitialRuns,
-      nListToBeSorted: nListToBeSorted,
-      method: 'B',
-    })
-  } else if (method === 'P') {
+  if (data.method === 'B') {
+    result = balancedMultiWaySort(data)
+  } else if (data.method === 'P') {
     result = polyphaseSort(data)
-  } else if (method === 'C') {
+  } else if (data.method === 'C') {
     result = cascadeSort(data)
   } else {
-    console.log(`Método ${method} não reconhecido.`)
+    console.log(`Método ${data.method} não reconhecido.`)
     return
   }
 
@@ -49,8 +31,14 @@ function processInput(input: string[]): void {
     })
   })
   console.log(`final ${result.alpha.toFixed(2)}`)
+  return result
 }
 
 // Teste com exemplo de entrada
-const inputExample = ['C', '3 4 3', '7 1 5 6 3 8 2 10 4 9 1 3 7 4 1 2 3']
-processInput(inputExample)
+processInput({
+  method: 'B',
+  mMaximumMemoryInRegisters: 3,
+  kMaximumFilesOpened: 4,
+  rInitialRuns: 3,
+  nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
+})

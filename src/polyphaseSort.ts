@@ -29,6 +29,7 @@ export function polyphaseSort(data: InputData): SortResult {
     mMaximumMemoryInRegisters,
     rInitialRuns,
   )
+  const sumInitialSequences = initialSequences.reduce((acc, seq) => acc + seq.length, 0)
   const files = distributeInitialSequences(initialSequences, data)
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
   phases.push({
@@ -76,7 +77,7 @@ export function polyphaseSort(data: InputData): SortResult {
   }
 
   // Cálculo final de alpha
-  const alpha = calculateAlpha(totalWrites, nListToBeSorted.length)
+  const alpha = calculateAlpha(totalWrites, sumInitialSequences)
 
   return { phases, alpha }
 }

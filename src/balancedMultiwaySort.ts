@@ -29,7 +29,7 @@ export function balancedMultiWaySort(data: InputData): SortResult {
     mMaximumMemoryInRegisters,
     rInitialRuns,
   )
-
+  const sumInitialSequences = initialSequences.reduce((acc, seq) => acc + seq.length, 0)
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
   let files = distributeInitialSequences(initialSequences, kMaximumFilesOpened)
 
@@ -85,7 +85,7 @@ export function balancedMultiWaySort(data: InputData): SortResult {
     phase++
   }
 
-  const alpha = calculateAlpha(totalWrites, nListToBeSorted.length)
+  const alpha = calculateAlpha(totalWrites, sumInitialSequences)
 
   return { phases, alpha }
 }

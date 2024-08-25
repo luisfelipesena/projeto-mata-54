@@ -42,7 +42,7 @@ export function generateInitialSequences(
   // for (let i = 0; i < n.length; i++) {
   while (nListToBeSorted.length > 0 || minHeap.size() > 0) {
     const currentValue = nListToBeSorted.shift()
-    if (sequences.length === rInitialRuns && nListToBeSorted.length === 0) {
+    if (sequences.length === rInitialRuns || nListToBeSorted.length === 0) {
       break
     }
 
