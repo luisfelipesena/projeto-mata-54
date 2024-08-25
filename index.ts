@@ -36,7 +36,7 @@ export function processInput(data: InputData) {
 
 // Teste com exemplo de entrada
 processInput({
-  method: 'B',
+  method: 'P',
   mMaximumMemoryInRegisters: 3,
   kMaximumFilesOpened: 4,
   rInitialRuns: 3,

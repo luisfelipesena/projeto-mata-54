@@ -29,7 +29,6 @@ export function polyphaseSort(data: InputData): SortResult {
     mMaximumMemoryInRegisters,
     rInitialRuns,
   )
-  const sumInitialSequences = initialSequences.reduce((acc, seq) => acc + seq.length, 0)
   const files = distributeInitialSequences(initialSequences, data)
   const beta0 = calculateBeta(mMaximumMemoryInRegisters, initialSequences)
   phases.push({
@@ -38,7 +37,9 @@ export function polyphaseSort(data: InputData): SortResult {
     sequences: initialSequences,
     filesOpened: deepCopy(files) as SequenceFile,
   })
-  totalWrites += initialSequences.reduce((acc, seq) => acc + seq.length, 0)
+
+  // Cada sequência inicial gerada é escrita uma vez nos arquivos
+  totalWrites += initialSequences.length
 
   const checkIfAllSequencesHasBeenMerged = (files: SequenceFile) => {
     return (
@@ -57,12 +58,13 @@ export function polyphaseSort(data: InputData): SortResult {
       const sequencesToMerge = busyFiles.map((file) => file[0] || [])
       const mergedSequence = mergeMultipleSequences(sequencesToMerge)
       busyFiles.forEach((busyFile) => busyFile.shift())
-      // Remove the first sequence of each file!
+      // Remove the primeira sequência de cada arquivo!
       if (files[freeFileIndex].length === 0) {
         files[freeFileIndex] = [mergedSequence] as Sequences
       } else if (files[freeFileIndex].length > 0) {
         files[freeFileIndex].push(mergedSequence)
       }
+      totalWrites += 1 // Uma operação de escrita para cada sequência gravada
     }
     const currentSequences = files.flat() as Sequences
     const beta = calculateBeta(mMaximumMemoryInRegisters, currentSequences)
@@ -73,13 +75,13 @@ export function polyphaseSort(data: InputData): SortResult {
       filesOpened: deepCopy(files) as SequenceFile,
     })
     phase++
-    totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
   }
+  const alpha = calculateAlpha(totalWrites, initialSequences.length)
 
-  // Cálculo final de alpha
-  const alpha = calculateAlpha(totalWrites, sumInitialSequences)
-
-  return { phases, alpha }
+  return {
+    phases,
+    alpha,
+  }
 }
 
 export function distributeInitialSequences(

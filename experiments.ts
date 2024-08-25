@@ -8,7 +8,7 @@ function gerarListaDeterministica(tamanho: number, semente: number): number[] {
   for (let i = 0; i < tamanho; i++) {
     // Algoritmo simples de geração de números pseudoaleatórios
     valor = (valor * 1103515245 + 12345) & 0x7fffffff
-    lista.push(valor % 100) // Limita os valores entre 0 e 99
+    lista.push(valor % 50000)
   }
 
   return lista
@@ -28,9 +28,9 @@ const resultados: [number, number][] = []
 
 for (const r of R) {
   const resultado = balancedMultiWaySort({
-    method: 'B',
-    mMaximumMemoryInRegisters: 3,
-    kMaximumFilesOpened: 4,
+    method: 'P',
+    mMaximumMemoryInRegisters: 2,
+    kMaximumFilesOpened: 8,
     rInitialRuns: r,
     nListToBeSorted: gerarListaDeterministica(50000, 42),
   })

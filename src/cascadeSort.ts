@@ -109,6 +109,7 @@ export function cascadeSort(data: InputData): SortResult {
       sequences: currentSequences,
       filesOpened: deepCopy(filesCopy) as SequenceFile,
     })
+    totalWrites += currentSequences.reduce((acc, seq) => acc + seq.length, 0)
     // C9. [Down a level.]
     l--
     first = 0
