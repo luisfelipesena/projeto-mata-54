@@ -28,9 +28,9 @@ const resultados: [number, number][] = []
 
 for (const r of R) {
   const resultado = balancedMultiWaySort({
-    method: 'P',
-    mMaximumMemoryInRegisters: 2,
-    kMaximumFilesOpened: 8,
+    method: 'B',
+    mMaximumMemoryInRegisters: 3,
+    kMaximumFilesOpened: 4,
     rInitialRuns: r,
     nListToBeSorted: gerarListaDeterministica(50000, 42),
   })
