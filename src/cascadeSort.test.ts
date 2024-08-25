@@ -114,12 +114,4 @@ it('CascadeMerge - deve realizar a mesclagem em cascata corretamente', () => {
     return tape
   }
   const result = mergeCascadePass(file)
-
-  // expect(mergeCascadePass(file)).toEqual([
-  //   genSequences(10, 4),
-  //   genSequences(9, 3),
-  //   genSequences(7, 2),
-  //   [],
-  //   genSequences(4, 1),
-  // ] as SequenceFile)
 })
