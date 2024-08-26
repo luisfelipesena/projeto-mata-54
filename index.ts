@@ -33,12 +33,3 @@ export function processInput(data: InputData) {
   console.log(`final ${result.alpha.toFixed(2)}`)
   return result
 }
-
-// Teste com exemplo de entrada
-processInput({
-  method: 'C',
-  mMaximumMemoryInRegisters: 3,
-  kMaximumFilesOpened: 4,
-  rInitialRuns: 3,
-  nListToBeSorted: [7, 1, 5, 6, 3, 8, 2, 10, 4, 9, 1, 3, 7, 4, 1, 2, 3],
-})

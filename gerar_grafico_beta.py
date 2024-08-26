@@ -45,7 +45,7 @@ def criar_grafico(resultados, metodo):
         beta = [d['beta'] for d in dados_j]
         
         # Atualizar os valores mínimo e máximo de beta
-        valid_betas = [b for b in beta if not math.isnan(b)]
+        valid_betas = [b for b in beta if not math.isnan(b) and b > 0]
         if valid_betas:
             min_beta = min(min_beta, min(valid_betas))
             max_beta = max(max_beta, max(valid_betas))
@@ -57,11 +57,16 @@ def criar_grafico(resultados, metodo):
     plt.ylabel('Fator de Crescimento (β)')
     plt.xlabel('Tamanho da Memória (m)')
     
-    # Ajustar os limites do eixo Y
-    y_margin = (max_beta - min_beta) * 0.1  # 10% de margem
-    plt.ylim(max(0, min_beta - y_margin), max_beta + y_margin)
+    # Usar escala logarítmica para o eixo Y
+    plt.yscale('log')
     
-    plt.title(f'Comportamento de β(m,j) para ordenação {metodo}, k = {K_FIXO}')
+    # Ajustar os limites do eixo Y
+    if min_beta > 0 and max_beta > 0:
+        plt.ylim(min_beta / 1.1, max_beta * 1.1)
+    
+    # Usar o nome completo do algoritmo no título
+    nome_completo = nomes_algoritmos[metodo]
+    plt.title(f'Comportamento de β(m,j) para ordenação {nome_completo}, k = {K_FIXO}')
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
 
@@ -78,6 +83,13 @@ K_FIXO = 4
 
 # Lista de métodos
 metodos = ['B', 'P', 'C']
+
+# Dicionário com os nomes completos dos algoritmos
+nomes_algoritmos = {
+    'B': 'Balanceada Multi-caminhos',
+    'P': 'Polifásica',
+    'C': 'Cascata'
+}
 
 # Processar cada método separadamente
 for metodo in metodos:
